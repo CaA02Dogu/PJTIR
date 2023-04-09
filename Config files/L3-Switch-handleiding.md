@@ -8,7 +8,8 @@
 Voeg het naam van het apparaat toe:
 
 	hostname <apparaat naam>
-Dit maakt het makkelijker om welk apparaat het gaat.
+
+
 ### Privilige mode login
 
 Maak een wachtwoord aan voor privilige mode autenticatie:
@@ -36,18 +37,19 @@ Stel een DHCP server in om de DNS server door te geven:
 	ipv6 dhcp pool DNS-POOL
 	 dns-server <IPv6 dns-server>
 
-
+\pagebreak
 
 ## SSH
+
 ### SSH login
 
-Creeer een gebruiker voor SSH:
+Maak een gebruiker aan voor SSH:
 
 	username <gebruikers naam> password 0 <wachtwoord>
 
 ### Genereer een crypto key voor SSH
 Om SSH te gebruiken hebben we een crypto key nodig.
-Creeer een sleutel met:
+Maak daarvoor een sleutel met:
 
 	crypto key generate rsa
 	1024
@@ -67,6 +69,9 @@ Om een interface op L3 verbinding in te stellen moet er in de gewenste interface
 	interface <interface>
 	 no switchport
 	 ipv6 address <IPv6 adres>
+
+\pagebreak
+
 ## OSPF
 ### Configuratie
 Om OSPF te gebruiken moeten we eerst de protocol instellen:
@@ -79,11 +84,13 @@ Om een netwerk in OSPF te zetten moet er bij de interface van dat netwerk OSPF o
 
 	interface <interface>
 	 ipv6 ospf <id> area <area-nr>
+
 ## Port-channels
 ### Loadbalancing instellen
 Voordat wij portchannels gaan instellen moeten we alvast tegen de switch zeggen dat er loadbalancing moet komen. Dit kan gedaan worden met:
 
 	port-channel load-balance src-dst-mac
+
 ### Configuratie
 Voor een etherchannel verbinding via Layer 2:
 
@@ -114,12 +121,13 @@ De enige verschill hier is dat de poort niet op switchport wordt gezet.
 
 
 ## VLANs
+
 ### Configuratie
-Het creeeren van een VLAN op een switch gaat als volgt:
+Het creëren van een VLAN op een switch gaat als volgt:
 
 	vlan <nummer>
 	 name <vlan naam>
-De commando `name` hier is niet verplicht maar maakt het makkelijk overzichtbaar waar elk VLAN voor bedoelt is. Binnen het PoC wordt er alleen gebruik gemaakt van VLAN 40(Management), 60(IT) en 70(Servers).
+Het commando `name` hier is niet verplicht maar maakt het makkelijk overzichtbaar waar elk VLAN voor bedoelt is. Binnen het PoC wordt er alleen gebruik gemaakt van VLAN 40(Management), 60(IT) en 70(Servers).
 
 ### SVI configuratie
 Bij een L3-switch wordt SVI ingesteld om te kunnen routeren met de VLAN's. Het configureren hiervan ziet er als volgt uit:
@@ -129,21 +137,25 @@ Bij een L3-switch wordt SVI ingesteld om te kunnen routeren met de VLAN's. Het c
 	 ipv6 nd other-config-flag
 	 ipv6 dhcp server DNS-POOL
 	 ipv6 ospf 1 area 0
-Hier net als bij een L3 portchannel stellen we gelijk ook OPSF in.
+Hier net als bij een L3 portchannel stellen we gelijk ook OPSF en DHCP in.
 
 ## Spanning-tree
+
 ### Configuratie
 Om RPVST in te stellen voeren wij het volgende uit:
 
 	spanning-tree mode rapid-pvst
-Om te bepalen wie de root switch is of secondairy van een gegeven VLAN:
+Om te bepalen wie de root switch of secondairy is van een gegeven VLAN:
 
 	spanning-tree vlan <nummer> root <primary/secondairy>
 
 
+\pagebreak
+
 ## HSRP
+
 ### Configuratie
-Om HSRP in te stellen moet er eerst in de interface nog wat ingesteld worden zoals virtuele IP.
+Om HSRP te gebruiken moet er eerst in de interface nog wat gedaan worden zoals het instellen van een virtuele IP.
 Hier onder een basis configuratie van HSRP:
 
 	interface <interface>
@@ -154,7 +166,7 @@ Hier onder een basis configuratie van HSRP:
 	 standby <nr> track <track-nr> decrement 50
 Eerst wordt HRSP versie 2 gespecificeerd. Daarna wordt er een virtuele IP ingesteld. Deze moet hetzelfde zijn als op de andere L3-switch. Dan wordt de priority nummer toegewezen om te bepalen welke L3-switch active wordt en welke op standby. Als laatst wordt er een track aangemaakt die aan een interface gekoppeld kan worden. Zo wordt er gekeken of een van de L3-switches is uitgevallen.
 
-Om de track op een interface te zetten wordt gedaan met:
+Om de track op een interface te zetten gebruik je de `track` commando:
 
 	track <track-nr> interface <interface> line-protocol
 
@@ -162,8 +174,9 @@ Om de track op een interface te zetten wordt gedaan met:
 
 
 ## QoS
+
 ### Configuratie
-Om QoS toe te passen moet er eerst een policy-map aangemaakt:
+Om QoS toe te passen wordt er gebruik gemaakt met policy maps. Om bijvoorbeeld een policy map te creëren die VOIP voorrang geeft, maken we een class binnen de gecreërde policy map:
 
 	policy-map <policy-name>
 	 class VOICE_VIDEO_EF
@@ -175,9 +188,9 @@ Om de policy map te gebruiken, kan de policy map ingesteld worden op een interfa
 	interface <interface>
 	 service-policy output <policy-name>
 
-
+\pagebreak
 ## SNMP
-Voordat wij SNMP gebuiken moet er een ACL komen om te defineren wie toegang heeft hiermee:
+Voordat wij SNMP kunnen gebuiken moet er een ACL komen om te defineren wie toegang heeft:
 
 	ipv6 access-list SNMP-ACCESS
 	 permit ipv6 <IPv6 netwerk> any
@@ -190,8 +203,8 @@ Nu is het mogelijk om via een host binnen het toegelaten netwerk, om het apparaa
 
 ## ACL
 
-### Creeeren
-Om een ACL te kunnen creeeren in IPv6 moeten we het eerst een naam geven:
+### Creëren
+Om een ACL te kunnen creëren in IPv6 moeten we het eerst een naam geven:
 
 	ipv6 access-list <naam>
 Na het uitvoeren van de prompt hierboven is het mogelijk om de gemaakte list te defineren:
@@ -200,14 +213,14 @@ Na het uitvoeren van de prompt hierboven is het mogelijk om de gemaakte list te 
 	 permit udp any any eq 1812
 	 deny ipv6 any 2000:0:0:60::/64
 	 permit ipv6 any any
-In dit voorbeeld wordt alle verkeer dat naar 2000:0:0:60:: wil, geblokkeerd met uitzonderingen zoals een icmp antwoord en de poort 1812.
+In dit voorbeeld wordt alle verkeer dat naar 2000:0:0:60:: wil, geblokkeerd met uitzonderingen zoals een icmp antwoord en alles dat door poort 1812 gaat.
 
 ### Invoeren
 Om de zojuist net gemaakte ACL te kunnen gebruiken moet dit op de gewenste interface gedaan worden:
 
 	interface <interface>
 	 ipv6 traffic-filter <naam> <in/out>
-De ACL kan zowel inkomend of uitgaand ingevoerd worden.
+De ACL kan zowel inkomend of uitgaand ingevoerd worden. Dit hangt af van wat het doel is van de ACL.
 
 
 
